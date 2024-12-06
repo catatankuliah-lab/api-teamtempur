@@ -13,21 +13,6 @@ app.use(cors({
 
 app.use(express.json());
 
-app.post('/webhook', (req, res) => {
-    if (req.body.ref === 'refs/heads/main') {
-        exec('sh /home/api-teamtempur/htdocs/api.teamtempur.delapandelapanlogistics.com/deploy.sh', (err, stdout, stderr) => {
-            if (err) {
-                console.error(`Error: ${stderr}`);
-                return res.status(500).send('Deployment failed');
-            }
-            console.log(`Output: ${stdout}`);
-            res.status(200).send('Deployment succeeded');
-        });
-    } else {
-        res.status(200).send('No deployment needed');
-    }
-});
-
 const init = async () => {
     try {
         await sequelize.authenticate();

@@ -1,48 +1,57 @@
-import sequelize from '../config/config.js';
+import sequelize from "../config/config.js";
 
 const User = {
-    getAllUsers: async () => {
-        const [results] = await sequelize.query('SELECT * FROM user');
-        return results;
-    },
+  // Mendapatkan semua user dengan join tabel role
+  getAllUsers: async () => {
+    const [results] = await sequelize.query(`
+            SELECT 
+                user.id_user, 
+                user.id_role, 
+                user.username, 
+                user.password, 
+                user.nama_user, 
+                role.deskripsi_role
+            FROM 
+                user
+            INNER JOIN 
+                role 
+            ON 
+                user.id_role = role.id_role
+        `);
+    return results;
+  },
 
-    getUserById: async (id_user) => {
-        const [results] = await sequelize.query('SELECT * FROM user WHERE id_user = ?', {
-            replacements: [id_user],
-        });
-        return results[0]
-    },
+  // Menambahkan user baru
+  addUser: async (id_role, username, password, nama_user) => {
+    const result = await sequelize.query(
+      "INSERT INTO user (id_role, username, password, nama_user) VALUES (?, ?, ?, ?)",
+      {
+        replacements: [id_role, username, password, nama_user],
+      }
+    );
+    return result[0]; // Mengembalikan hasil dari query
+  },
 
-    addUser: async (id_role, username, password, nama_lengkap, alamat_user, foto_user, status_user) => {
-        const [result] = await sequelize.query(
-            'INSERT INTO user (id_role, username, password, nama_lengkap, alamat_user, foto_user, status_user) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            {
-                replacements: [id_role, username, password, nama_lengkap, alamat_user, foto_user, status_user],
-            }
-        );
-        console.log(result);
-        return { id_user: result };
-    },
+  // Mengupdate user berdasarkan id_user
+  updateUser: async (id_user, id_role, username, password, nama_user) => {
+    const result = await sequelize.query(
+      `UPDATE user 
+            SET id_role = ?, username = ?, password = ?, nama_user = ? 
+            WHERE id_user = ?`,
+      {
+        replacements: [id_role, username, password, nama_user, id_user],
+      }
+    );
+    return result[0]; // Mengembalikan hasil dari query
+  },
 
-    updateUser: async (id_user, id_role, username, password, nama_lengkap, alamat_user, foto_user, status_user) => {
-        const result = await sequelize.query(
-            'UPDATE user SET id_role = ?, username = ?, password = ?, nama_lengkap = ?, alamat_user = ?, foto_user = ?, status_user = ? WHERE id_user = ?',
-            {
-                replacements: [id_role, username, password, nama_lengkap, alamat_user, foto_user, status_user, id_user],
-            }
-        );
-        return result[0];
-    },
-
-    deleteUser: async (id_user) => {
-        const result = await sequelize.query(
-            'DELETE FROM user WHERE id_user = ?',
-            {
-                replacements: [id_user],
-            }
-        );
-        return result[0];
-    },
+  // Menghapus user berdasarkan id_user
+  deleteUser: async (id_user) => {
+    const result = await sequelize.query("DELETE FROM user WHERE id_user = ?", {
+      replacements: [id_user],
+    });
+    return result[0]; // Mengembalikan hasil dari query
+  },
 };
 
 export default User;
